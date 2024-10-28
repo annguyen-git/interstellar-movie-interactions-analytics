@@ -1,6 +1,7 @@
 import requests
 import re
 import PyPDF2
+import pandas as pd
 from collections import defaultdict
 
 
@@ -96,3 +97,43 @@ def count_interactions(parsed_script):
             current_scene_characters.append(item)
     
     return interactions
+
+from collections import defaultdict
+
+def count_interactions_df(parsed_script):
+    interactions = defaultdict(lambda: {'direct': 0, 'indirect': 0})
+    current_scene_characters = []  # Track characters in the current scene
+    
+    for i, item in enumerate(parsed_script):
+        if item == 'SCENE_CHANGE':
+            # Process interactions within the current scene
+            for j in range(len(current_scene_characters) - 1):
+                for k in range(j + 1, min(j + 3, len(current_scene_characters))):
+                    char1 = current_scene_characters[j]
+                    char2 = current_scene_characters[k]
+                    
+                    if char1 != char2:
+                        key = tuple(sorted([char1, char2]))
+                        if k == j + 1:
+                            interactions[key]['direct'] += 1
+                        elif k == j + 2:
+                            interactions[key]['indirect'] += 1
+            # Reset characters for the next scene
+            current_scene_characters.clear()
+        else:
+            # Add character to current scene
+            current_scene_characters.append(item)
+    
+    results = []
+    for (char1, char2), counts in interactions.items():
+        results.append({
+            'character1': char1,
+            'character2': char2,
+            'direct_interaction': counts['direct'],
+            'indirect_interaction': counts['indirect']
+        })
+    
+    # Convert to a DataFrame
+    df = pd.DataFrame(results)
+    
+    return df
