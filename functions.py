@@ -4,18 +4,12 @@ import PyPDF2
 from collections import defaultdict
 
 
-# URLs for downloading the PDFs
-url_list = {
-    '2014_script': 'https://assets.scriptslug.com/live/pdf/scripts/interstellar-2014.pdf',
-    '2008_script': 'https://s3-us-west-2.amazonaws.com/screenplays-pdf/Movie-Screenplay-PDFs/Interstellar-Jonathan-Nolan.pdf'
-}
-
 # Step 1: Download PDF files from urls
 def get_files(url_list):
     for name, url in url_list.items():
         response = requests.get(url)
         if response.status_code == 200:
-            filename = f'{name}.pdf'
+            filename = f'data/{name}.pdf'
             with open(filename, 'wb') as file:
                 file.write(response.content)
             print(f"Downloaded: {filename}")
@@ -25,8 +19,8 @@ def get_files(url_list):
 # Step 2: Convert PDFs to text files
 def pdf_to_text(url_list):
     for name in url_list.keys():
-        pdf_path = f'{name}.pdf'
-        output_txt = f'{name}.txt'
+        pdf_path = f'data/{name}.pdf'
+        output_txt = f'data/{name}.txt'
         
         # Open each PDF and read its content
         with open(pdf_path, 'rb') as pdf_file:
