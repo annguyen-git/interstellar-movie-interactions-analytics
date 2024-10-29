@@ -4,7 +4,7 @@
 ### Overview
 This project visualizes the interactions network between characters from the movie *Interstellar*, based on the 2014 final script compared to the 2008 draft version. By analyzing and comparing these versions, we can observe changes in character roles and interactions, while noting that some characters remain consistent.
 
-![Interstellar Network](https://github.com/annguyen-git/interstellar-movie-interactions-analytics/blob/main/resources/interstellar_2014.png)
+![Interstellar Network](https://github.com/annguyen-git/interstellar-movie-interactions-analytics/blob/main/resources/interaction_network.gif)
 
 You can explore the interactive networks here:
 - [Interstellar movie 2014 script, interactive network](https://annguyen-git.github.io/interstellar-movie-interactions-analytics/output/interstellar_2014.html)
