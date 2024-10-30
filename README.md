@@ -4,6 +4,10 @@
 ### Overview
 This project visualizes the interactions network between characters from the movie *Interstellar*, based on the 2014 final script compared to the 2008 draft version. By analyzing and comparing these versions, we can observe changes in character roles and interactions, while noting that some characters remain consistent.
 
+Please check:
+`create_network.ipynb` for network setups.
+`interactions_analytics.ipynb` for further insight of interactions analysis.
+
 ![Interstellar Network](https://github.com/annguyen-git/interstellar-movie-interactions-analytics/blob/main/resources/interaction_network.gif)
 
 You can explore the interactive networks here:
@@ -39,5 +43,3 @@ The following steps outline the process used to generate and visualize the chara
    - Import the `NetworkX` graph into `Pyvis` to create an interactive HTML visualization.
    - Customize the node sizes based on each character's total interactions and adjust edge thickness to reflect interaction frequency.
    - Save the visualizations as HTML files in the `output/` directory for easy viewing.
-
-Please see funtions.py and notebook file for more details.
