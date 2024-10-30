@@ -4,39 +4,32 @@ import PyPDF2
 import pandas as pd
 from collections import defaultdict
 
-
-# Step 1: Download PDF files from urls
 def get_files(url_list):
     for name, url in url_list.items():
         response = requests.get(url)
+        
         if response.status_code == 200:
-            filename = f'data/{name}.pdf'
-            with open(filename, 'wb') as file:
+            pdf_path = f'data/{name}.pdf'
+            output_txt = f'data/{name}.txt'
+            with open(pdf_path, 'wb') as file:
                 file.write(response.content)
-            print(f"Downloaded: {filename}")
+            print(f"Downloaded: {pdf_path}")
+
+        # Open each PDF and read its content
+            with open(pdf_path, 'rb') as pdf_file:
+                pdf_reader = PyPDF2.PdfReader(pdf_file)
+                text = ''
+                # Extract text from each page
+                for page_num in range(len(pdf_reader.pages)):
+                    page = pdf_reader.pages[page_num]
+                    text += page.extract_text() if page.extract_text() else ''
+    
+            # Write the text to a .txt file
+            with open(output_txt, 'w', encoding='utf-8') as txt_file:
+                txt_file.write(text)
+            print(f"Converted {pdf_path} to {output_txt}")
         else:
             print(f"Failed to download {name}, status code: {response.status_code}")
-
-# Step 2: Convert PDFs to text files
-def pdf_to_text(url_list):
-    for name in url_list.keys():
-        pdf_path = f'data/{name}.pdf'
-        output_txt = f'data/{name}.txt'
-        
-        # Open each PDF and read its content
-        with open(pdf_path, 'rb') as pdf_file:
-            pdf_reader = PyPDF2.PdfReader(pdf_file)
-            text = ''
-
-            # Extract text from each page
-            for page_num in range(len(pdf_reader.pages)):
-                page = pdf_reader.pages[page_num]
-                text += page.extract_text() if page.extract_text() else ''
-
-        # Write the text to a .txt file
-        with open(output_txt, 'w', encoding='utf-8') as txt_file:
-            txt_file.write(text)
-        print(f"Converted {pdf_path} to {output_txt}")
 
 
 # Since it is a moie script, it is easy to extract character's names using Regex. I'm looking for any capital line, followed by a whitespace.
@@ -137,3 +130,52 @@ def count_interactions_df(parsed_script):
     df = pd.DataFrame(results)
     
     return df
+
+def clean_parsed_script(script_lines):
+    cleaned_script = []
+    previous_line = None
+    
+    # Step 1: Clean SCENE_CHANGE entries
+    for line in script_lines:
+        if line == "SCENE_CHANGE":
+            # Only add SCENE_CHANGE if the previous line was not SCENE_CHANGE
+            if previous_line != "SCENE_CHANGE":
+                cleaned_script.append(line)
+        else:
+            cleaned_script.append(line)
+        previous_line = line
+    
+    # Step 2: Rename SCENE_CHANGE to SCENE1, SCENE2, ...
+    renamed_script = []
+    scene_count = 0
+    
+    for line in cleaned_script:
+        if line == "SCENE_CHANGE":
+            scene_count += 1
+            renamed_script.append(f"SCENE{scene_count}")
+        else:
+            renamed_script.append(line)
+    
+    # Step 3: Count interactions in each scene
+    scene_interactions = {}
+    current_scene = None
+    
+    for line in renamed_script:
+        if line.startswith("SCENE"):
+            current_scene = line
+            scene_interactions[current_scene] = []
+        else:
+            if current_scene:
+                scene_interactions[current_scene].append(line)
+    
+    # Count interactions
+    interaction_counts = {scene: len(interactions) for scene, interactions in scene_interactions.items()}
+    
+    # Convert the interaction counts dictionary to a DataFrame
+    df_interaction_counts = pd.DataFrame.from_dict(interaction_counts, orient='index', columns=['InteractionCount'])
+    
+    # Reset index and rename columns
+    df_interaction_counts.reset_index(inplace=True)
+    df_interaction_counts.rename(columns={'index': 'Scene'}, inplace=True)
+    
+    return df_interaction_counts
